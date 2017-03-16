@@ -18,7 +18,7 @@ public class MapController : MonoBehaviour {
     private float chanceBrokenLeft = 0.15f;
     private float chanceBrokenRight = 0.15f;
 
-    private float runningSpeed = 10;
+    private float runningSpeed = 1;
 
     private ArrayList bridge;
     private int bridgeParts = 20;
@@ -47,27 +47,22 @@ public class MapController : MonoBehaviour {
 
         player.transform.Translate(Vector3.right * runningSpeed * Time.deltaTime);
 
-        for (int i = bridge.Count -1; i >= 0; i++)
+        for (int i = bridge.Count -1; i >= 0; i--)
         {
             GameObject currentBridgePart = (GameObject)bridge[i];
-            if(currentBridgePart.transform.position.z < cam.transform.position.z)
+
+            // -10 als Puffer für Kamera
+            if (currentBridgePart.transform.position.x < (player.transform.position.x - 10))
             {
-                // Element löschen wenn außer Sichtweite
+                Destroy(currentBridgePart);
                 bridge.RemoveAt(i);
-                bridge.Add(bridgeIntact);
+
+                // Neuen Part hinzufügen
+                Vector3 endPos = ((GameObject)bridge[bridge.Count - 1]).transform.position + new Vector3(2,0,0);
+                loadNewBridgePart(endPos);
             }
         }
 	}
-
-    void FixedUpdate()
-    {
-        if (Input.GetKeyDown(KeyCode.UpArrow))
-        {
-            Debug.Log("Move");
-            //player.GetComponent<Rigidbody>().AddForce(new Vector3(2, 0, 0));
-            //player.GetComponent<Rigidbody>().velocity = new Vector3(0, runningSpeed, 0) * Time.deltaTime;
-        }
-    }
 
     void loadNewBridgePart(Vector3 pos)
     {
@@ -76,22 +71,24 @@ public class MapController : MonoBehaviour {
 
         if(r <= chanceIntact * 100)
         {
-            part = bridgeIntact;
+            part = Instantiate(bridgeIntact, pos, Quaternion.Euler(0, 90, 0));
             Debug.Log("Intact");
         } else if(r <= chanceIntact * 100 + chanceBrokenLeft * 100)
         {
-            part = bridgeBrokenLeft;
+            part = Instantiate(bridgeBrokenLeft, pos, Quaternion.Euler(0, 90, 0));
             Debug.Log("Broken Left");
         } else
         {
-            part = bridgeBrokenRight;
+            part = Instantiate(bridgeBrokenRight, pos, Quaternion.Euler(0, 90, 0));
             Debug.Log("Broken Right");
         }
 
-        Debug.Log("Instatiating at: " + pos);
-        part.transform.rotation = Quaternion.Euler(0, 90, 0);
-        part.transform.position = pos;
-        Instantiate(part.transform);
+        //Debug.Log("Instatiating at: " + pos);
+        //part.transform.rotation = Quaternion.Euler(0, 90, 0);
+        //part.transform.position = pos;
+        //Instantiate(part.transform);
+
+        bridge.Add(part);
     }
 	#endregion
 }
