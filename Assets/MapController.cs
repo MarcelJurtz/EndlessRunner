@@ -18,11 +18,12 @@ public class MapController : MonoBehaviour {
     private float chanceBrokenLeft = 0.15f;
     private float chanceBrokenRight = 0.15f;
 
-    private float runningSpeed = 1;
+    private float runningSpeed = 10;
 
     private ArrayList bridge;
-    private int bridgeParts = 10;
+    private int bridgeParts = 20;
     private float bridgeLength = 3f;
+    private Vector3 currentBridgePartPosition;
 
     private System.Random rand = new System.Random();
 	#endregion
@@ -30,20 +31,23 @@ public class MapController : MonoBehaviour {
 	#region Methods
 	void Start () {
         bridge = new ArrayList();
-        Vector3 partPosition = player.transform.position;
-        partPosition.y -= 3;
+        currentBridgePartPosition = player.transform.position;
+        currentBridgePartPosition.y -= 3;
         // populateArray
         for(int i = 0; i < bridgeParts;i++)
         {
-            loadNewBridgePart(partPosition);
+            loadNewBridgePart(currentBridgePartPosition);
             //partPosition.z += bridgeIntact.GetComponent<Renderer>().bounds.size.z;
             // TODO
-            partPosition.x += bridgeLength;
+            currentBridgePartPosition.x += bridgeLength;
         }
 	}
-    /*
+    
 	void Update () {
-		for(int i = bridge.Count -1; i >= 0; i++)
+
+        player.transform.Translate(Vector3.right * runningSpeed * Time.deltaTime);
+
+        for (int i = bridge.Count -1; i >= 0; i++)
         {
             GameObject currentBridgePart = (GameObject)bridge[i];
             if(currentBridgePart.transform.position.z < cam.transform.position.z)
@@ -54,7 +58,17 @@ public class MapController : MonoBehaviour {
             }
         }
 	}
-    */
+
+    void FixedUpdate()
+    {
+        if (Input.GetKeyDown(KeyCode.UpArrow))
+        {
+            Debug.Log("Move");
+            //player.GetComponent<Rigidbody>().AddForce(new Vector3(2, 0, 0));
+            //player.GetComponent<Rigidbody>().velocity = new Vector3(0, runningSpeed, 0) * Time.deltaTime;
+        }
+    }
+
     void loadNewBridgePart(Vector3 pos)
     {
         GameObject part;
