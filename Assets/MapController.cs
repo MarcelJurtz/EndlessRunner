@@ -14,11 +14,18 @@ public class MapController : MonoBehaviour {
     public GameObject cam;
     public GameObject player;
 
-    private float chanceIntact = 0.7f;
-    private float chanceBrokenLeft = 0.15f;
-    private float chanceBrokenRight = 0.15f;
+    private const float CHANCE_INTACT = 0.7f;
+    private const float CHANCE_BROKEN_LEFT = 0.15f;
+    private const float CHANCE_BROKEN_RIGHT = 0.15f;
 
-    private float runningSpeed = 1;
+    // Bestimmung der Wahrscheinlichkeit des Spawns eines kaputten Blocks
+    // Wechsel zwischen 0 und den Konstanten, um mehrere Lücken am Stück zu verhindern
+    private float chanceIntact = CHANCE_INTACT;
+    private float chanceBrokenLeft = CHANCE_BROKEN_LEFT;
+    private float chanceBrokenRight = CHANCE_BROKEN_RIGHT;
+
+
+    private float runningSpeed = 10;
 
     private ArrayList bridge;
     private int bridgeParts = 20;
@@ -33,7 +40,7 @@ public class MapController : MonoBehaviour {
         bridge = new ArrayList();
         currentBridgePartPosition = player.transform.position;
         currentBridgePartPosition.y -= 3;
-        // populateArray
+        // Start-Array belegen
         for(int i = 0; i < bridgeParts;i++)
         {
             loadNewBridgePart(currentBridgePartPosition);
@@ -58,7 +65,7 @@ public class MapController : MonoBehaviour {
                 bridge.RemoveAt(i);
 
                 // Neuen Part hinzufügen
-                Vector3 endPos = ((GameObject)bridge[bridge.Count - 1]).transform.position + new Vector3(2,0,0);
+                Vector3 endPos = ((GameObject)bridge[bridge.Count - 1]).transform.position + new Vector3(bridgeLength,0,0);
                 loadNewBridgePart(endPos);
             }
         }
@@ -72,21 +79,25 @@ public class MapController : MonoBehaviour {
         if(r <= chanceIntact * 100)
         {
             part = Instantiate(bridgeIntact, pos, Quaternion.Euler(0, 90, 0));
-            Debug.Log("Intact");
-        } else if(r <= chanceIntact * 100 + chanceBrokenLeft * 100)
+            chanceIntact = CHANCE_INTACT;
+            chanceBrokenLeft = CHANCE_BROKEN_LEFT;
+            chanceBrokenRight = CHANCE_BROKEN_RIGHT;
+
+        }
+        else if(r <= chanceIntact * 100 + chanceBrokenLeft * 100)
         {
             part = Instantiate(bridgeBrokenLeft, pos, Quaternion.Euler(0, 90, 0));
-            Debug.Log("Broken Left");
-        } else
+            chanceIntact = 1;
+            chanceBrokenLeft = 0;
+            chanceBrokenRight = 0;
+        }
+        else
         {
             part = Instantiate(bridgeBrokenRight, pos, Quaternion.Euler(0, 90, 0));
-            Debug.Log("Broken Right");
+            chanceIntact = 1;
+            chanceBrokenLeft = 0;
+            chanceBrokenRight = 0;
         }
-
-        //Debug.Log("Instatiating at: " + pos);
-        //part.transform.rotation = Quaternion.Euler(0, 90, 0);
-        //part.transform.position = pos;
-        //Instantiate(part.transform);
 
         bridge.Add(part);
     }
